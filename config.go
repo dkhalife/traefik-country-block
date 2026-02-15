@@ -22,6 +22,7 @@ func CreateConfig() *Config {
 	return &Config{
 		DefaultAction:      "403",
 		AllowPrivateRanges: true,
+		DatabasePath:       "./IP2LOCATION-LITE-DB1.BIN",
 	}
 }
 

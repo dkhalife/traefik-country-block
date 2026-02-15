@@ -67,21 +67,29 @@ func TestValidateConfig_BlocklistWithAllowedFields(t *testing.T) {
 }
 
 func TestValidateConfig_ValidBlocklist(t *testing.T) {
-	cfg := &Config{Mode: "blocklist", BlockedCountries: []string{"CN"}}
+	cfg := &Config{Mode: "blocklist", DatabasePath: testDBPath, BlockedCountries: []string{"CN"}}
 	if err := validateConfig(cfg); err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
 }
 
 func TestValidateConfig_ValidAllowlist(t *testing.T) {
-	cfg := &Config{Mode: "allowlist", AllowedCountries: []string{"US"}}
+	cfg := &Config{Mode: "allowlist", DatabasePath: testDBPath, AllowedCountries: []string{"US"}}
+	if err := validateConfig(cfg); err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+}
+
+func TestValidateConfig_MissingDatabasePath(t *testing.T) {
+	cfg := &Config{Mode: "blocklist", DatabasePath: ""}
+	// Should still pass validation — New() will fail when opening the file
 	if err := validateConfig(cfg); err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
 }
 
 func TestValidateConfig_DefaultActionFillsIn(t *testing.T) {
-	cfg := &Config{Mode: "blocklist"}
+	cfg := &Config{Mode: "blocklist", DatabasePath: testDBPath}
 	if err := validateConfig(cfg); err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -173,6 +181,9 @@ func TestCreateConfig_Defaults(t *testing.T) {
 	}
 	if !cfg.AllowPrivateRanges {
 		t.Fatal("expected AllowPrivateRanges to default to true")
+	}
+	if cfg.DatabasePath != "./IP2LOCATION-LITE-DB1.BIN" {
+		t.Fatalf("expected default databasePath, got %q", cfg.DatabasePath)
 	}
 }
 
