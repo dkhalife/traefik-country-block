@@ -6,26 +6,22 @@ import (
 	"testing"
 )
 
-const testDBPath = "./IP2LOCATION-LITE-DB1.BIN"
-
 // helper to create a working config for tests
 func baseBlocklistConfig() *Config {
 	return &Config{
-		Mode:              "blocklist",
-		DatabasePath:      testDBPath,
-		DefaultAction:     "403",
+		Mode:               "blocklist",
+		DefaultAction:      "403",
 		AllowPrivateRanges: true,
-		BlockedCountries:  []string{"CN"},
+		BlockedCountries:   []string{"CN"},
 	}
 }
 
 func baseAllowlistConfig() *Config {
 	return &Config{
-		Mode:              "allowlist",
-		DatabasePath:      testDBPath,
-		DefaultAction:     "403",
+		Mode:               "allowlist",
+		DefaultAction:      "403",
 		AllowPrivateRanges: true,
-		AllowedCountries:  []string{"US"},
+		AllowedCountries:   []string{"US"},
 	}
 }
 
@@ -67,29 +63,28 @@ func TestValidateConfig_BlocklistWithAllowedFields(t *testing.T) {
 }
 
 func TestValidateConfig_ValidBlocklist(t *testing.T) {
-	cfg := &Config{Mode: "blocklist", DatabasePath: testDBPath, BlockedCountries: []string{"CN"}}
+	cfg := &Config{Mode: "blocklist", BlockedCountries: []string{"CN"}}
 	if err := validateConfig(cfg); err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
 }
 
 func TestValidateConfig_ValidAllowlist(t *testing.T) {
-	cfg := &Config{Mode: "allowlist", DatabasePath: testDBPath, AllowedCountries: []string{"US"}}
+	cfg := &Config{Mode: "allowlist", AllowedCountries: []string{"US"}}
 	if err := validateConfig(cfg); err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
 }
 
 func TestValidateConfig_MissingDatabasePath(t *testing.T) {
-	cfg := &Config{Mode: "blocklist", DatabasePath: ""}
-	// Should still pass validation — New() will fail when opening the file
+	cfg := &Config{Mode: "blocklist"}
 	if err := validateConfig(cfg); err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
 }
 
 func TestValidateConfig_DefaultActionFillsIn(t *testing.T) {
-	cfg := &Config{Mode: "blocklist", DatabasePath: testDBPath}
+	cfg := &Config{Mode: "blocklist"}
 	if err := validateConfig(cfg); err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -181,9 +176,6 @@ func TestCreateConfig_Defaults(t *testing.T) {
 	}
 	if !cfg.AllowPrivateRanges {
 		t.Fatal("expected AllowPrivateRanges to default to true")
-	}
-	if cfg.DatabasePath != "./IP2LOCATION-LITE-DB1.BIN" {
-		t.Fatalf("expected default databasePath, got %q", cfg.DatabasePath)
 	}
 }
 
@@ -525,22 +517,10 @@ func TestNew_InvalidConfig(t *testing.T) {
 	}
 }
 
-func TestNew_InvalidDBPath(t *testing.T) {
-	cfg := &Config{
-		Mode:         "blocklist",
-		DatabasePath: "/nonexistent/path.bin",
-	}
-	_, err := New(nil, http.DefaultServeMux, cfg, "test")
-	if err == nil {
-		t.Fatal("expected error for invalid DB path")
-	}
-}
-
 func TestNew_InvalidCIDR(t *testing.T) {
 	cfg := &Config{
-		Mode:         "blocklist",
-		DatabasePath: testDBPath,
-		BlockedIPs:   []string{"not-valid"},
+		Mode:       "blocklist",
+		BlockedIPs: []string{"not-valid"},
 	}
 	_, err := New(nil, http.DefaultServeMux, cfg, "test")
 	if err == nil {
@@ -550,9 +530,8 @@ func TestNew_InvalidCIDR(t *testing.T) {
 
 func TestNew_InvalidInternalIP(t *testing.T) {
 	cfg := &Config{
-		Mode:         "blocklist",
-		DatabasePath: testDBPath,
-		InternalIPs:  []string{"not-valid"},
+		Mode:        "blocklist",
+		InternalIPs: []string{"not-valid"},
 	}
 	_, err := New(nil, http.DefaultServeMux, cfg, "test")
 	if err == nil {

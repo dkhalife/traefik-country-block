@@ -7,22 +7,20 @@ import (
 )
 
 type Config struct {
-	Mode              string   `json:"mode"`
-	DatabasePath      string   `json:"databasePath"`
-	DefaultAction     string   `json:"defaultAction"`
-	AllowPrivateRanges bool    `json:"allowPrivateRanges"`
-	InternalIPs       []string `json:"internalIPs,omitempty"`
-	AllowedCountries  []string `json:"allowedCountries,omitempty"`
-	AllowedIPs        []string `json:"allowedIPs,omitempty"`
-	BlockedCountries  []string `json:"blockedCountries,omitempty"`
-	BlockedIPs        []string `json:"blockedIPs,omitempty"`
+	Mode               string   `json:"mode"`
+	DefaultAction      string   `json:"defaultAction"`
+	AllowPrivateRanges bool     `json:"allowPrivateRanges"`
+	InternalIPs        []string `json:"internalIPs,omitempty"`
+	AllowedCountries   []string `json:"allowedCountries,omitempty"`
+	AllowedIPs         []string `json:"allowedIPs,omitempty"`
+	BlockedCountries   []string `json:"blockedCountries,omitempty"`
+	BlockedIPs         []string `json:"blockedIPs,omitempty"`
 }
 
 func CreateConfig() *Config {
 	return &Config{
 		DefaultAction:      "403",
 		AllowPrivateRanges: true,
-		DatabasePath:       "./IP2LOCATION-LITE-DB1.BIN",
 	}
 }
 

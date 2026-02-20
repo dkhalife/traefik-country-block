@@ -30,7 +30,6 @@ type CountryBlock struct {
 	next             http.Handler
 	name             string
 	config           *Config
-	lookup           *lookup
 	cache            *cache
 	modeNets         []*net.IPNet
 	internalNets     []*net.IPNet
@@ -40,11 +39,6 @@ type CountryBlock struct {
 
 func New(ctx context.Context, next http.Handler, config *Config, name string) (http.Handler, error) {
 	if err := validateConfig(config); err != nil {
-		return nil, err
-	}
-
-	lk, err := newLookup(config.DatabasePath)
-	if err != nil {
 		return nil, err
 	}
 
@@ -81,7 +75,6 @@ func New(ctx context.Context, next http.Handler, config *Config, name string) (h
 		next:             next,
 		name:             name,
 		config:           config,
-		lookup:           lk,
 		cache:            newCache(),
 		modeNets:         modeNets,
 		internalNets:     internalNets,
@@ -152,7 +145,7 @@ func (cb *CountryBlock) evaluate(ipStr string, ip net.IP) bool {
 
 	countryMatch := false
 	if len(cb.countries) > 0 {
-		country, err := cb.lookup.country(ipStr)
+		country, err := lookupCountry(ipStr)
 		if err == nil && country != "" && country != "-" {
 			_, countryMatch = cb.countries[strings.ToUpper(country)]
 		}
