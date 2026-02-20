@@ -4,11 +4,12 @@
 
 **Privacy First, Zero External Calls.**
 
-Traefik Country Block is a [Traefik](https://traefik.io/) middleware plugin that filters HTTP requests based on the client's country of origin or explicit IP/CIDR rules. Every lookup is performed locally using an embedded [IP2Location LITE](https://lite.ip2location.com/) database — no data ever leaves your infrastructure. Decisions are cached in memory for blazing-fast repeat lookups.
+Traefik Country Block is a [Traefik](https://traefik.io/) middleware plugin that filters HTTP requests based on the client's country of origin or explicit IP/CIDR rules. Every lookup is performed locally using embedded [IP2Location LITE](https://lite.ip2location.com/) data compiled directly into the plugin source — no external database file, no external API calls, and no data ever leaves your infrastructure. Decisions are cached in memory for blazing-fast repeat lookups.
 
 ## 🎯 Goals and Principles
 
-* **No external API calls** — all geolocation lookups happen locally against an in-memory database
+* **No external API calls** — all geolocation lookups happen locally against in-memory data
+* **No external database file** — IP2Location data is compiled into the plugin source; no `.BIN` file to manage
 * **Your data stays yours** — client IPs are never sent to third-party services
 * **Blazing fast** — IP decisions are cached in memory after first evaluation; CIDR lists are pre-parsed at startup
 * **Flexible** — supports allowlist and blocklist modes with per-route configuration
@@ -39,7 +40,6 @@ http:
       plugin:
         countryblock:
           mode: blocklist
-          databasePath: /etc/traefik/IP2LOCATION-LITE-DB1.BIN
           defaultAction: "403"
           allowPrivateRanges: true
           blockedCountries:
@@ -64,7 +64,6 @@ http:
 | Field | Type | Default | Description |
 |---|---|---|---|
 | `mode` | `string` | *(required)* | `"allowlist"` or `"blocklist"`. Mutually exclusive — only one mode's fields may be populated. |
-| `databasePath` | `string` | *(required)* | Path to the IP2Location `.BIN` database file. |
 | `defaultAction` | `string` | `"403"` | Action when a request is denied: `"403"` (Forbidden), `"404"` (Not Found), or `"close"` (silently close the connection). |
 | `allowPrivateRanges` | `bool` | `true` | Automatically allow RFC 1918, loopback, and link-local addresses (IPv4 and IPv6). |
 | `internalIPs` | `[]string` | `[]` | Additional CIDRs that are always allowed regardless of mode (e.g., custom pod CIDRs). |
@@ -86,7 +85,6 @@ http:
       plugin:
         countryblock:
           mode: blocklist
-          databasePath: /etc/traefik/IP2LOCATION-LITE-DB1.BIN
           defaultAction: "403"
           allowPrivateRanges: true
           blockedCountries:
@@ -107,7 +105,6 @@ http:
       plugin:
         countryblock:
           mode: allowlist
-          databasePath: /etc/traefik/IP2LOCATION-LITE-DB1.BIN
           defaultAction: close
           allowPrivateRanges: true
           internalIPs:
@@ -150,7 +147,6 @@ spec:
   plugin:
     countryblock:
       mode: blocklist
-      databasePath: /etc/traefik/IP2LOCATION-LITE-DB1.BIN
       blockedCountries:
         - CN
 ```
@@ -177,6 +173,18 @@ Each scope can use a different plugin instance with its own configuration.
 
 Contributions are welcome! Feel free to fork the repo and submit pull requests.
 If you have ideas but aren't familiar with code, you can also [open issues](https://github.com/dkhalife/traefik-country-block/issues).
+
+### Updating the geolocation data
+
+The IP-to-country data is embedded directly in `geodata.go`. To regenerate it from a newer IP2Location LITE database:
+
+1. Download the latest `IP2LOCATION-LITE-DB1.BIN` from [IP2Location LITE](https://lite.ip2location.com/)
+2. Place it in the project root
+3. Run the generator:
+   ```bash
+   go generate ./...
+   ```
+4. Commit the updated `geodata.go`
 
 ## 🔒 License
 

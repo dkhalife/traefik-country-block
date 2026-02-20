@@ -4,7 +4,6 @@ import: github.com/dkhalife/traefik-country-block
 summary: Block or allow HTTP requests based on country of origin using a local IP geolocation database. No external API calls — all lookups are performed locally with in-memory caching for maximum performance and privacy.
 testData:
   mode: blocklist
-  databasePath: "./IP2LOCATION-LITE-DB1.BIN"
   defaultAction: "403"
   allowPrivateRanges: true
   blockedCountries:

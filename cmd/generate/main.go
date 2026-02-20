@@ -43,8 +43,8 @@ func main() {
 	fmt.Printf("IPv6: %d records at offset %d\n", ipv6Count, ipv6Addr)
 
 	// Column sizes (matching ip2location library)
-	ipv4ColSize := uint32(dbColumn) * 4                    // 4 bytes per column
-	ipv6ColSize := 16 + (uint32(dbColumn)-1)*4             // 16-byte IP + 4 bytes per remaining column
+	ipv4ColSize := uint32(dbColumn) * 4        // 4 bytes per column
+	ipv6ColSize := 16 + (uint32(dbColumn)-1)*4 // 16-byte IP + 4 bytes per remaining column
 
 	// Country code index: 0 = "-" (unknown/unassigned)
 	countryList := []string{"-"}
