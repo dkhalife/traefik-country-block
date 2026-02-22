@@ -36,10 +36,14 @@ func ensureInit() {
 }
 
 func decodeIPv4Data() []ipv4Entry {
-	if geoIPv4Data == "" {
+	return decodeIPv4(geoIPv4Data)
+}
+
+func decodeIPv4(b64 string) []ipv4Entry {
+	if b64 == "" {
 		return nil
 	}
-	data, err := base64.StdEncoding.DecodeString(geoIPv4Data)
+	data, err := base64.StdEncoding.DecodeString(b64)
 	if err != nil {
 		return nil
 	}
@@ -56,10 +60,14 @@ func decodeIPv4Data() []ipv4Entry {
 }
 
 func decodeIPv6Data() []ipv6Entry {
-	if geoIPv6Data == "" {
+	return decodeIPv6(geoIPv6Data)
+}
+
+func decodeIPv6(b64 string) []ipv6Entry {
+	if b64 == "" {
 		return nil
 	}
-	data, err := base64.StdEncoding.DecodeString(geoIPv6Data)
+	data, err := base64.StdEncoding.DecodeString(b64)
 	if err != nil {
 		return nil
 	}
