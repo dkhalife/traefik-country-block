@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"net"
 	"sort"
+	"sync"
 )
 
 type ipv4Entry struct {
@@ -21,12 +22,17 @@ type ipv6Entry struct {
 	country uint8
 }
 
-var ipv4Entries []ipv4Entry
-var ipv6Entries []ipv6Entry
+var (
+	geoOnce     sync.Once
+	ipv4Entries []ipv4Entry
+	ipv6Entries []ipv6Entry
+)
 
-func init() {
-	ipv4Entries = decodeIPv4Data()
-	ipv6Entries = decodeIPv6Data()
+func ensureInit() {
+	geoOnce.Do(func() {
+		ipv4Entries = decodeIPv4Data()
+		ipv6Entries = decodeIPv6Data()
+	})
 }
 
 func decodeIPv4Data() []ipv4Entry {
@@ -109,6 +115,7 @@ func lookupCountry(ipStr string) (string, error) {
 }
 
 func lookupIPv4(num uint32) string {
+	ensureInit()
 	if len(ipv4Entries) == 0 {
 		return "-"
 	}
@@ -126,6 +133,7 @@ func lookupIPv4(num uint32) string {
 }
 
 func lookupIPv6(hi, lo uint64) string {
+	ensureInit()
 	if len(ipv6Entries) == 0 {
 		return "-"
 	}

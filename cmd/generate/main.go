@@ -190,22 +190,5 @@ func main() {
 }
 
 func writeBase64Const(f *os.File, name string, s string) {
-	if s == "" {
-		fmt.Fprintf(f, "const %s = \"\"\n", name)
-		return
-	}
-	fmt.Fprintf(f, "const %s = \"\" +\n", name)
-	const chunkSize = 76
-	for i := 0; i < len(s); i += chunkSize {
-		end := i + chunkSize
-		if end > len(s) {
-			end = len(s)
-		}
-		chunk := s[i:end]
-		if end < len(s) {
-			fmt.Fprintf(f, "\t%q +\n", chunk)
-		} else {
-			fmt.Fprintf(f, "\t%q\n", chunk)
-		}
-	}
+	fmt.Fprintf(f, "const %s = %q\n", name, s)
 }
