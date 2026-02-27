@@ -90,15 +90,6 @@ func (cb *CountryBlock) ServeHTTP(rw http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	parsedIP := net.ParseIP(ip)
-
-	if parsedIP != nil {
-		if cb.isInternal(parsedIP) {
-			cb.next.ServeHTTP(rw, req)
-			return
-		}
-	}
-
 	if allowed, found := cb.cache.get(ip); found {
 		if allowed {
 			cb.next.ServeHTTP(rw, req)
@@ -106,6 +97,15 @@ func (cb *CountryBlock) ServeHTTP(rw http.ResponseWriter, req *http.Request) {
 			cb.deny(rw, req)
 		}
 		return
+	}
+
+	parsedIP := net.ParseIP(ip)
+
+	if parsedIP != nil {
+		if cb.isInternal(parsedIP) {
+			cb.next.ServeHTTP(rw, req)
+			return
+		}
 	}
 
 	allowed := cb.evaluate(ip, parsedIP)
@@ -144,10 +144,10 @@ func (cb *CountryBlock) evaluate(ipStr string, ip net.IP) bool {
 	}
 
 	countryMatch := false
-	if len(cb.countries) > 0 {
-		country, err := lookupCountry(ipStr)
+	if len(cb.countries) > 0 && ip != nil {
+		country, err := lookupCountryFromIP(ip)
 		if err == nil && country != "" && country != "-" {
-			_, countryMatch = cb.countries[strings.ToUpper(country)]
+			_, countryMatch = cb.countries[country]
 		}
 	}
 
@@ -181,8 +181,11 @@ func (cb *CountryBlock) deny(rw http.ResponseWriter, req *http.Request) {
 
 func extractIP(req *http.Request) string {
 	if xff := req.Header.Get("X-Forwarded-For"); xff != "" {
-		parts := strings.Split(xff, ",")
-		ip := strings.TrimSpace(parts[0])
+		candidate := xff
+		if comma := strings.IndexByte(xff, ','); comma >= 0 {
+			candidate = xff[:comma]
+		}
+		ip := strings.TrimSpace(candidate)
 		if net.ParseIP(ip) != nil {
 			return ip
 		}
@@ -197,7 +200,7 @@ func extractIP(req *http.Request) string {
 
 	host, _, err := net.SplitHostPort(req.RemoteAddr)
 	if err != nil {
-		return req.RemoteAddr
+		return strings.TrimSpace(req.RemoteAddr)
 	}
-	return host
+	return strings.TrimSpace(host)
 }

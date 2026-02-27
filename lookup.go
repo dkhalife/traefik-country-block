@@ -90,6 +90,14 @@ func lookupCountry(ipStr string) (string, error) {
 		return "", fmt.Errorf("country lookup failed for %q: invalid IP", ipStr)
 	}
 
+	return lookupCountryFromIP(ip)
+}
+
+func lookupCountryFromIP(ip net.IP) (string, error) {
+	if ip == nil {
+		return "", fmt.Errorf("country lookup failed: invalid IP")
+	}
+
 	if v4 := ip.To4(); v4 != nil {
 		num := binary.BigEndian.Uint32(v4)
 		return lookupIPv4(num), nil
@@ -97,7 +105,7 @@ func lookupCountry(ipStr string) (string, error) {
 
 	v6 := ip.To16()
 	if v6 == nil {
-		return "", fmt.Errorf("country lookup failed for %q: invalid IP", ipStr)
+		return "", fmt.Errorf("country lookup failed: invalid IP")
 	}
 
 	// 6to4 addresses (2002::/16): extract embedded IPv4
